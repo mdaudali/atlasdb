@@ -31,4 +31,8 @@ public interface TimestampLeaseResults {
     static TimestampLeaseResults of(LockToken lock, Map<TimestampLeaseName, TimestampLeaseResult> results) {
         return ImmutableTimestampLeaseResults.of(lock, results);
     }
+
+    static ImmutableTimestampLeaseResults.Builder builder() {
+        return ImmutableTimestampLeaseResults.builder();
+    }
 }

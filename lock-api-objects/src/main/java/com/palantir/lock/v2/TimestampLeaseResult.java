@@ -30,4 +30,8 @@ public interface TimestampLeaseResult {
     static TimestampLeaseResult of(long minLeasedTimestamp, LongSupplier freshTimestampsSupplier) {
         return ImmutableTimestampLeaseResult.of(minLeasedTimestamp, freshTimestampsSupplier);
     }
+
+    static ImmutableTimestampLeaseResult.Builder builder() {
+        return ImmutableTimestampLeaseResult.builder();
+    }
 }
