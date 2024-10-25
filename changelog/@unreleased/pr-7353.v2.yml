@@ -5,6 +5,6 @@ improvement:
     - CassandraTExceptions()
     - CassandraTimedOutException()
 
-    Amended how UnavailableException TSwift Cassandra native Exceptions are caught, and they now get mapped to InsufficientConsistencyException() via CassandraTExceptions().
+    Amended how UnavailableException Thrift Cassandra native Exceptions are caught, and they now get mapped to InsufficientConsistencyException() via CassandraTExceptions().
   links:
   - https://github.com/palantir/atlasdb/pull/7353
