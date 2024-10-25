@@ -32,7 +32,7 @@ public class CassandraTimedOutException extends AtlasDbDependencyException {
                 + "   Resolution: Change the query to request less data.\n"
                 + "2. Reason: Data that has been deleted is being read in the query (e.g. A large amount of"
                 + " tombstones).\n"
-                + "   Resolution: Run a compaction on your Cassandra server.\n"
+                + "   Resolution: Check the status of sweep for your client, and if required run a compaction on your Cassandra server.\n"
                 + "3. Reason: Cassandra is struggling, possibly due to another large query, server health issues, or a"
                 + " network outage.\n"
                 + "   Resolution: Ask your CassandraOps to check the state of the Cassandra server.";
