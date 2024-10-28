@@ -198,7 +198,7 @@ import java.util.stream.Collectors;
     }
 
     @Override
-    public List<OpenTransaction> startTransactions(List<? extends PreCommitCondition> conditions) {
+    public List<OpenTransactionImpl> startTransactions(List<? extends PreCommitCondition> conditions) {
         if (conditions.isEmpty()) {
             return ImmutableList.of();
         }

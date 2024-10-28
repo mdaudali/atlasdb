@@ -442,7 +442,7 @@ public interface TransactionManager extends AutoCloseable {
      */
     @Deprecated
     @Timed
-    List<OpenTransaction> startTransactions(List<? extends PreCommitCondition> condition);
+    List<? extends OpenTransaction> startTransactions(List<? extends PreCommitCondition> condition);
 
     /**
      * Frees resources used by this TransactionManager, and invokes any callbacks registered to run on close.
