@@ -185,7 +185,7 @@ import java.util.stream.Collectors;
     public <T, C extends PreCommitCondition, E extends Exception> T runTaskWithConditionThrowOnConflict(
             C condition, ConditionAwareTransactionTask<T, C, E> task) throws E, TransactionFailedRetriableException {
         checkOpen();
-        OpenTransaction openTransaction;
+        OpenTransactionImpl openTransaction;
         try {
             openTransaction = runTimed(
                     () -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask");
