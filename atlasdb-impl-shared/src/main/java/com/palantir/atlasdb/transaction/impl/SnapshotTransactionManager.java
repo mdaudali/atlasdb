@@ -194,12 +194,31 @@ import java.util.stream.Collectors;
         try {
             openTransaction = runTimed(
                     () -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask");
+            openTransaction.onCommitOrAbort(condition::cleanup);
         } catch (Exception e) {
             condition.cleanup();
             throw e;
         }
-        return openTransaction.finishWithCallback(
-                transaction -> task.execute(transaction, condition), condition::cleanup);
+        try {
+            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(
+                    transaction -> task.execute(transaction, condition),
+                    ((OpenTransactionImpl) openTransaction).immutableTsLock);
+            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, openTransaction), "executingTask");
+        } finally {
+            openTransaction.close();
+        }
+    }
+
+    private <T, E extends Exception> TransactionTask<T, E> wrapTaskIfNecessary(
+            TransactionTask<T, E> task, LockToken immutableTsLock) {
+        if (taskWrappingIsNecessary()) {
+            return new LockCheckingTransactionTask<>(task, timelockService, immutableTsLock);
+        }
+        return task;
+    }
+
+    private boolean taskWrappingIsNecessary() {
+        return !validateLocksOnReads;
     }
 
     @Override
@@ -265,33 +284,18 @@ import java.util.stream.Collectors;
         }
 
         @Override
-        public <T, E extends Exception> T finish(TransactionTask<T, E> task)
-                throws E, TransactionFailedRetriableException {
-            return finishWithCallback(task, () -> {});
-        }
-
-        @Override
-        public <T, E extends Exception> T finishWithCallback(TransactionTask<T, E> task, Runnable callback)
-                throws E, TransactionFailedRetriableException {
-            Timer postTaskTimer = getTimer("finishTask");
-            Timer.Context postTaskContext;
-
-            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(task, immutableTsLock);
-
+        public void close() {
             ExpectationsAwareTransaction txn = delegate;
-            T result;
             try {
-                txn.onCommitOrAbort(txn::reportExpectationsCollectedData);
-                txn.onCommitOrAbort(callback);
-                result = runTaskThrowOnConflict(wrappedTask, txn);
+                if (txn.isUncommitted()) {
+                    txn.abort();
+                }
             } finally {
+                txn.reportExpectationsCollectedData();
                 lockWatchManager.requestTransactionStateRemovalFromCache(getTimestamp());
-                postTaskContext = postTaskTimer.time();
                 openTransactionCounter.dec();
             }
             scrubForAggressiveHardDelete(extractSnapshotTransaction(txn));
-            postTaskContext.stop();
-            return result;
         }
     }
 
@@ -300,18 +304,6 @@ import java.util.stream.Collectors;
             // t.getCellsToScrubImmediately() checks that t has been committed
             cleaner.scrubImmediately(this, tx.getCellsToScrubImmediately(), tx.getTimestamp(), tx.getCommitTimestamp());
         }
-    }
-
-    private <T, E extends Exception> TransactionTask<T, E> wrapTaskIfNecessary(
-            TransactionTask<T, E> task, LockToken immutableTsLock) {
-        if (taskWrappingIsNecessary()) {
-            return new LockCheckingTransactionTask<>(task, timelockService, immutableTsLock);
-        }
-        return task;
-    }
-
-    private boolean taskWrappingIsNecessary() {
-        return !validateLocksOnReads;
     }
 
     protected ExpectationsAwareTransaction createTransaction(

@@ -429,12 +429,18 @@ public interface TransactionManager extends AutoCloseable {
     void registerClosingCallback(Runnable closingCallback);
 
     /**
-     * This method can be used for direct control over the lifecycle of a batch of transactions. For example, if the
-     * work done in each given transaction is interactive and cannot be expressed as a {@link TransactionTask} ahead of
-     * time, this method allows for a long lived transaction object. For any data read or written to the transaction to
-     * be valid, the transaction must be committed by calling {@link OpenTransaction#finish(TransactionTask)} to
-     * also perform additional cleanup. Note that this does not clean up the pre commit condition associated with that
-     * task. The order of transactions returned corresponds with the pre commit conditions passed in, however there are
+     * This method can be used for direct control over the lifecycle of a batch of transactions.
+     * For example, if the work done in each given transaction is interactive and cannot be expressed as a
+     * {@link TransactionTask} ahead of time, this method allows for a long lived transaction object.
+     * <p>
+     * For any data read or written to the transaction to be valid, the transaction must be committed explicitly
+     * by the caller with {@link Transaction#commit()}.
+     * <p>
+     * Note the caller must also call {@link OpenTransaction#close()} after the transaction is committed to perform
+     * additional cleanup. {@link OpenTransaction#close} does not clean up the pre commit condition associated with that
+     * task.
+     * <p>
+     * The order of transactions returned corresponds with the pre commit conditions passed in, however there are
      * no guarantees on the ordering of transactions returned with respect to their start timestamp.
      *
      * @return a batch of transactions with associated immutable timestamp locks
