@@ -53,7 +53,7 @@ public class TestTransactionManagerImpl extends SerializableTransactionManager i
             ImmutableTransactionConfig.builder().build();
 
     private final Map<TableReference, ConflictHandler> conflictHandlerOverrides = new HashMap<>();
-    private final WrapperWithTracker<CallbackAwareTransaction> transactionWrapper;
+    private final WrapperWithTracker<ExpectationsAwareTransaction> transactionWrapper;
     private Optional<Long> unreadableTs = Optional.empty();
 
     public TestTransactionManagerImpl(
@@ -96,7 +96,7 @@ public class TestTransactionManagerImpl extends SerializableTransactionManager i
             TimestampCache timestampCache,
             MultiTableSweepQueueWriter sweepQueue,
             ExecutorService deleteExecutor,
-            WrapperWithTracker<CallbackAwareTransaction> transactionWrapper,
+            WrapperWithTracker<ExpectationsAwareTransaction> transactionWrapper,
             TransactionKnowledgeComponents knowledge,
             KeyValueSnapshotReaderManager keyValueSnapshotReaderManager) {
         this(
@@ -126,7 +126,7 @@ public class TestTransactionManagerImpl extends SerializableTransactionManager i
             TimestampCache timestampCache,
             MultiTableSweepQueueWriter sweepQueue,
             ExecutorService deleteExecutor,
-            WrapperWithTracker<CallbackAwareTransaction> transactionWrapper,
+            WrapperWithTracker<ExpectationsAwareTransaction> transactionWrapper,
             TransactionKnowledgeComponents knowledge,
             KeyValueSnapshotReaderManager keyValueSnapshotReaderManager) {
         super(
@@ -178,7 +178,7 @@ public class TestTransactionManagerImpl extends SerializableTransactionManager i
     }
 
     @Override
-    protected CallbackAwareTransaction createTransaction(
+    protected ExpectationsAwareTransaction createTransaction(
             long immutableTimestamp,
             LongSupplier startTimestampSupplier,
             LockToken immutableTsLock,

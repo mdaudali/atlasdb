@@ -580,7 +580,7 @@ public class SerializableTransactionManager extends SnapshotTransactionManager {
     }
 
     @Override
-    protected CallbackAwareTransaction createTransaction(
+    protected ExpectationsAwareTransaction createTransaction(
             long immutableTimestamp,
             LongSupplier startTimestampSupplier,
             LockToken immutableTsLock,

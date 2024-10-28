@@ -61,11 +61,11 @@ public class ReadTransactionShould {
             .buildOrThrow();
 
     private ReadTransaction readTransaction;
-    private CallbackAwareTransaction delegateTransaction;
+    private ExpectationsAwareTransaction delegateTransaction;
 
     @BeforeEach
     public void setUp() {
-        delegateTransaction = Mockito.mock(CallbackAwareTransaction.class);
+        delegateTransaction = Mockito.mock(ExpectationsAwareTransaction.class);
         SweepStrategyManager sweepStrategies = Mockito.mock(SweepStrategyManager.class);
         when(sweepStrategies.get(DUMMY_CONSERVATIVE_TABLE)).thenReturn(SweepStrategy.CONSERVATIVE);
         when(sweepStrategies.get(DUMMY_THOROUGH_TABLE)).thenReturn(SweepStrategy.THOROUGH);

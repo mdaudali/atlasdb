@@ -230,7 +230,7 @@ import org.eclipse.collections.impl.factory.primitive.LongSets;
  * different rows and using range scans.
  */
 public class SnapshotTransaction extends AbstractTransaction
-        implements ConstraintCheckingTransaction, CallbackAwareTransaction, TimestampLeaseAwareTransaction {
+        implements ConstraintCheckingTransaction, ExpectationsAwareTransaction, TimestampLeaseAwareTransaction {
     private static final SafeLogger log = SafeLoggerFactory.get(SnapshotTransaction.class);
     private static final SafeLogger perfLogger = SafeLoggerFactory.get("dualschema.perf");
     private static final SafeLogger transactionLengthLogger = SafeLoggerFactory.get("txn.length");

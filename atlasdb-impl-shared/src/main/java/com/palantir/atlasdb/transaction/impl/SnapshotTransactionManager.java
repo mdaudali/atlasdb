@@ -230,7 +230,7 @@ import java.util.stream.Collectors;
                                         response.immutableTimestamp().getLock();
                                 LongSupplier startTimestampSupplier = response.startTimestampAndPartition()::timestamp;
 
-                                CallbackAwareTransaction transaction = createTransaction(
+                                ExpectationsAwareTransaction transaction = createTransaction(
                                         immutableTs, startTimestampSupplier, immutableTsLock, condition);
                                 transaction.onSuccess(
                                         () -> lockWatchManager.onTransactionCommit(transaction.getTimestamp()));
@@ -251,16 +251,16 @@ import java.util.stream.Collectors;
 
     private final class OpenTransactionImpl extends ForwardingTransaction implements OpenTransaction {
 
-        private final CallbackAwareTransaction delegate;
+        private final ExpectationsAwareTransaction delegate;
         private final LockToken immutableTsLock;
 
-        private OpenTransactionImpl(CallbackAwareTransaction delegate, LockToken immutableTsLock) {
+        private OpenTransactionImpl(ExpectationsAwareTransaction delegate, LockToken immutableTsLock) {
             this.delegate = delegate;
             this.immutableTsLock = immutableTsLock;
         }
 
         @Override
-        public CallbackAwareTransaction delegate() {
+        public ExpectationsAwareTransaction delegate() {
             return delegate;
         }
 
@@ -278,7 +278,7 @@ import java.util.stream.Collectors;
 
             TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(task, immutableTsLock);
 
-            CallbackAwareTransaction txn = delegate;
+            ExpectationsAwareTransaction txn = delegate;
             T result;
             try {
                 txn.onCommitOrAbort(txn::reportExpectationsCollectedData);
@@ -314,7 +314,7 @@ import java.util.stream.Collectors;
         return !validateLocksOnReads;
     }
 
-    protected CallbackAwareTransaction createTransaction(
+    protected ExpectationsAwareTransaction createTransaction(
             long immutableTimestamp,
             LongSupplier startTimestampSupplier,
             LockToken immutableTsLock,

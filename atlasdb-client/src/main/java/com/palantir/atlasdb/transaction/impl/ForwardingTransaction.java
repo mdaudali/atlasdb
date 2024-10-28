@@ -221,6 +221,11 @@ public abstract class ForwardingTransaction extends ForwardingObject implements 
     }
 
     @Override
+    public void onCommitOrAbort(Runnable runnable) {
+        delegate().onCommitOrAbort(runnable);
+    }
+
+    @Override
     public ListenableFuture<Map<Cell, byte[]>> getAsync(TableReference tableRef, Set<Cell> cells) {
         return delegate().getAsync(tableRef, cells);
     }

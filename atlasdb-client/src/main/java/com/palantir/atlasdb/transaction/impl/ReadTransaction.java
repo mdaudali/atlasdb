@@ -41,17 +41,17 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class ReadTransaction extends ForwardingCallbackAwareTransaction {
-    private final CallbackAwareTransaction delegate;
+public class ReadTransaction extends ForwardingExpectationsAwareTransaction {
+    private final ExpectationsAwareTransaction delegate;
     private final SweepStrategyManager sweepStrategies;
 
-    public ReadTransaction(CallbackAwareTransaction delegate, SweepStrategyManager sweepStrategies) {
+    public ReadTransaction(ExpectationsAwareTransaction delegate, SweepStrategyManager sweepStrategies) {
         this.delegate = delegate;
         this.sweepStrategies = sweepStrategies;
     }
 
     @Override
-    public CallbackAwareTransaction delegate() {
+    public ExpectationsAwareTransaction delegate() {
         return delegate;
     }
 

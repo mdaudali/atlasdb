@@ -214,7 +214,7 @@ public abstract class AbstractSnapshotTransactionTest extends AtlasDbTestCase {
     private static final Consumer<Long> NO_OP_THROW_IF_CONDITION_INVALID = _timestamp -> {};
 
     private final String name;
-    private final WrapperWithTracker<CallbackAwareTransaction> transactionWrapper;
+    private final WrapperWithTracker<ExpectationsAwareTransaction> transactionWrapper;
 
     private final TimestampCache timestampCache = new DefaultTimestampCache(
             metricsManager.getRegistry(), () -> AtlasDbConstants.DEFAULT_TIMESTAMP_CACHE_SIZE);
@@ -246,7 +246,7 @@ public abstract class AbstractSnapshotTransactionTest extends AtlasDbTestCase {
     }
 
     public AbstractSnapshotTransactionTest(
-            String name, WrapperWithTracker<CallbackAwareTransaction> transactionWrapper) {
+            String name, WrapperWithTracker<ExpectationsAwareTransaction> transactionWrapper) {
         this.name = name;
         this.transactionWrapper = transactionWrapper;
     }
@@ -2031,12 +2031,12 @@ public abstract class AbstractSnapshotTransactionTest extends AtlasDbTestCase {
         SnapshotTransaction snapshotTransaction = getSnapshotTransactionWith(
                 startTimestampSupplier, startedTransactions.getImmutableTimestamp(), invalidatableDataKeyValueService);
         PathTypeTracker pathTypeTracker = PathTypeTrackers.constructSynchronousTracker();
-        Transaction callbackAwareTransaction = transactionWrapper.apply(snapshotTransaction, pathTypeTracker);
+        Transaction expectationsAwareTransaction = transactionWrapper.apply(snapshotTransaction, pathTypeTracker);
 
-        callbackAwareTransaction.put(TABLE, ImmutableMap.of(TEST_CELL, TEST_VALUE));
+        expectationsAwareTransaction.put(TABLE, ImmutableMap.of(TEST_CELL, TEST_VALUE));
 
         invalidatableDataKeyValueService.invalidate();
-        assertThatLoggableExceptionThrownBy(callbackAwareTransaction::commit)
+        assertThatLoggableExceptionThrownBy(expectationsAwareTransaction::commit)
                 .isInstanceOf(TransactionFailedRetriableException.class)
                 .hasLogMessage("Transaction key value service is no longer valid")
                 .args()
@@ -2055,12 +2055,12 @@ public abstract class AbstractSnapshotTransactionTest extends AtlasDbTestCase {
         SnapshotTransaction snapshotTransaction = getSnapshotTransactionWith(
                 startTimestampSupplier, startedTransactions.getImmutableTimestamp(), invalidatableDataKeyValueService);
         PathTypeTracker pathTypeTracker = PathTypeTrackers.constructSynchronousTracker();
-        Transaction callbackAwareTransaction = transactionWrapper.apply(snapshotTransaction, pathTypeTracker);
+        Transaction expectationsAwareTransaction = transactionWrapper.apply(snapshotTransaction, pathTypeTracker);
 
-        callbackAwareTransaction.get(TABLE, ImmutableSet.of(TEST_CELL));
+        expectationsAwareTransaction.get(TABLE, ImmutableSet.of(TEST_CELL));
         invalidatableDataKeyValueService.invalidate();
 
-        assertThatCode(callbackAwareTransaction::commit)
+        assertThatCode(expectationsAwareTransaction::commit)
                 .as("although the transaction key value service was no longer valid, read transactions performed"
                         + " all their reads effectively at the start timestamp, so these would still be valid.")
                 .doesNotThrowAnyException();
