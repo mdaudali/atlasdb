@@ -219,7 +219,7 @@ import java.util.stream.Collectors;
             recordImmutableTimestamp(immutableTs);
             cleaner.punch(responses.get(0).startTimestampAndPartition().timestamp());
 
-            List<OpenTransaction> transactions = Streams.zip(
+            List<OpenTransactionImpl> transactions = Streams.zip(
                             responses.stream(), conditions.stream(), (response, condition) -> {
                                 LockToken immutableTsLock =
                                         response.immutableTimestamp().getLock();
