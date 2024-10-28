@@ -16,11 +16,11 @@
 
 package com.palantir.lock.client;
 
+import com.palantir.atlasdb.common.api.timelock.TimestampLeaseName;
 import com.palantir.atlasdb.timelock.api.ConjureGetFreshTimestampsRequestV2;
 import com.palantir.atlasdb.timelock.api.ConjureGetFreshTimestampsResponseV2;
 import com.palantir.atlasdb.timelock.api.ConjureTimestampRange;
 import com.palantir.atlasdb.timelock.api.Namespace;
-import com.palantir.atlasdb.timelock.api.TimestampLeaseName;
 import com.palantir.lock.client.timestampleases.MinLeasedTimestampGetter;
 import com.palantir.lock.client.timestampleases.TimestampLeaseAcquirer;
 import com.palantir.lock.v2.ClientLockingOptions;
