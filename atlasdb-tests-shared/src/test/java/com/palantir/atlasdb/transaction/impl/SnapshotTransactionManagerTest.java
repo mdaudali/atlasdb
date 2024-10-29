@@ -74,7 +74,7 @@ public class SnapshotTransactionManagerTest {
     private static final String SETUP_TASK_METRIC_NAME =
             SnapshotTransactionManager.class.getCanonicalName() + ".setupTask";
     private static final String FINISH_TASK_METRIC_NAME =
-            SnapshotTransactionManager.class.getCanonicalName() + ".finishTask";
+            SnapshotTransactionManager.class.getCanonicalName() + ".runTaskThrowOnConflict";
 
     private final CloseableLockService closeableLockService = mock(CloseableLockService.class);
     private final Cleaner cleaner = mock(Cleaner.class);
@@ -290,7 +290,7 @@ public class SnapshotTransactionManagerTest {
     public void startEmptyBatchOfTransactionsDoesNotCallTimelockService() {
         TimelockService timelockService = spy(inMemoryTimelockClassExtension.getLegacyTimelockService());
         SnapshotTransactionManager transactionManager = createSnapshotTransactionManager(timelockService, false);
-        List<OpenTransaction> transactions = transactionManager.startTransactions(ImmutableList.of());
+        List<? extends OpenTransaction> transactions = transactionManager.startTransactions(ImmutableList.of());
 
         assertThat(transactions).isEmpty();
         verify(timelockService, never()).startIdentifiedAtlasDbTransactionBatch(anyInt());

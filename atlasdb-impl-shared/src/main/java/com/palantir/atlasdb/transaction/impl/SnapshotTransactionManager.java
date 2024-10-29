@@ -190,7 +190,7 @@ import java.util.stream.Collectors;
     public <T, C extends PreCommitCondition, E extends Exception> T runTaskWithConditionThrowOnConflict(
             C condition, ConditionAwareTransactionTask<T, C, E> task) throws E, TransactionFailedRetriableException {
         checkOpen();
-        OpenTransaction openTransaction;
+        OpenTransactionImpl openTransaction;
         try {
             openTransaction = runTimed(
                     () -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask");
@@ -201,9 +201,8 @@ import java.util.stream.Collectors;
         }
         try {
             TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(
-                    transaction -> task.execute(transaction, condition),
-                    ((OpenTransactionImpl) openTransaction).immutableTsLock);
-            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, openTransaction), "executingTask");
+                    transaction -> task.execute(transaction, condition), openTransaction.getImmutableTsLock());
+            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, openTransaction), "runTaskThrowOnConflict");
         } finally {
             openTransaction.close();
         }
@@ -222,7 +221,7 @@ import java.util.stream.Collectors;
     }
 
     @Override
-    public List<OpenTransaction> startTransactions(List<? extends PreCommitCondition> conditions) {
+    public List<OpenTransactionImpl> startTransactions(List<? extends PreCommitCondition> conditions) {
         if (conditions.isEmpty()) {
             return ImmutableList.of();
         }
@@ -243,7 +242,7 @@ import java.util.stream.Collectors;
             recordImmutableTimestamp(immutableTs);
             cleaner.punch(responses.get(0).startTimestampAndPartition().timestamp());
 
-            List<OpenTransaction> transactions = Streams.zip(
+            List<OpenTransactionImpl> transactions = Streams.zip(
                             responses.stream(), conditions.stream(), (response, condition) -> {
                                 LockToken immutableTsLock =
                                         response.immutableTimestamp().getLock();
@@ -268,7 +267,7 @@ import java.util.stream.Collectors;
         }
     }
 
-    private final class OpenTransactionImpl extends ForwardingTransaction implements OpenTransaction {
+    final class OpenTransactionImpl extends ForwardingTransaction implements OpenTransaction {
 
         private final ExpectationsAwareTransaction delegate;
         private final LockToken immutableTsLock;
@@ -276,6 +275,10 @@ import java.util.stream.Collectors;
         private OpenTransactionImpl(ExpectationsAwareTransaction delegate, LockToken immutableTsLock) {
             this.delegate = delegate;
             this.immutableTsLock = immutableTsLock;
+        }
+
+        LockToken getImmutableTsLock() {
+            return immutableTsLock;
         }
 
         @Override
