@@ -200,24 +200,10 @@ import java.util.stream.Collectors;
             throw e;
         }
         try {
-            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(
-                    transaction -> task.execute(transaction, condition), openTransaction.getImmutableTsLock());
-            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, openTransaction), "runTaskThrowOnConflict");
+            return openTransaction.execute(txn -> task.execute(txn, condition));
         } finally {
             openTransaction.close();
         }
-    }
-
-    private <T, E extends Exception> TransactionTask<T, E> wrapTaskIfNecessary(
-            TransactionTask<T, E> task, LockToken immutableTsLock) {
-        if (taskWrappingIsNecessary()) {
-            return new LockCheckingTransactionTask<>(task, timelockService, immutableTsLock);
-        }
-        return task;
-    }
-
-    private boolean taskWrappingIsNecessary() {
-        return !validateLocksOnReads;
     }
 
     @Override
@@ -278,8 +264,9 @@ import java.util.stream.Collectors;
             this.immutableTsLock = immutableTsLock;
         }
 
-        LockToken getImmutableTsLock() {
-            return immutableTsLock;
+        <T, E extends Exception> T execute(TransactionTask<T, E> task) {
+            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(task, immutableTsLock);
+            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, delegate), "runTaskThrowOnConflict");
         }
 
         @Override
@@ -309,6 +296,18 @@ import java.util.stream.Collectors;
 
             hasClosed = true;
         }
+    }
+
+    private <T, E extends Exception> TransactionTask<T, E> wrapTaskIfNecessary(
+            TransactionTask<T, E> task, LockToken immutableTsLock) {
+        if (taskWrappingIsNecessary()) {
+            return new LockCheckingTransactionTask<>(task, timelockService, immutableTsLock);
+        }
+        return task;
+    }
+
+    private boolean taskWrappingIsNecessary() {
+        return !validateLocksOnReads;
     }
 
     private void scrubForAggressiveHardDelete(SnapshotTransaction tx) {
