@@ -73,7 +73,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class SnapshotTransactionManagerTest {
     private static final String SETUP_TASK_METRIC_NAME =
             SnapshotTransactionManager.class.getCanonicalName() + ".setupTask";
-    private static final String FINISH_TASK_METRIC_NAME =
+    private static final String RUN_TASK_METRIC_NAME =
             SnapshotTransactionManager.class.getCanonicalName() + ".runTaskThrowOnConflict";
 
     private final CloseableLockService closeableLockService = mock(CloseableLockService.class);
@@ -250,14 +250,14 @@ public class SnapshotTransactionManagerTest {
         TaggedMetricRegistry registry = snapshotTransactionManager.metricsManager.getTaggedRegistry();
         assertThat(registry.getMetrics().keySet().stream().map(MetricName::safeName))
                 .contains(SETUP_TASK_METRIC_NAME)
-                .contains(FINISH_TASK_METRIC_NAME);
+                .contains(RUN_TASK_METRIC_NAME);
         assertThat(registry.timer(MetricName.builder()
                                 .safeName(SETUP_TASK_METRIC_NAME)
                                 .build())
                         .getCount())
                 .isGreaterThanOrEqualTo(1);
         assertThat(registry.timer(MetricName.builder()
-                                .safeName(FINISH_TASK_METRIC_NAME)
+                                .safeName(RUN_TASK_METRIC_NAME)
                                 .build())
                         .getCount())
                 .isGreaterThanOrEqualTo(1);
