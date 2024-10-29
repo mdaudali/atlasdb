@@ -271,6 +271,7 @@ import java.util.stream.Collectors;
 
         private final ExpectationsAwareTransaction delegate;
         private final LockToken immutableTsLock;
+        private boolean hasClosed = false;
 
         private OpenTransactionImpl(ExpectationsAwareTransaction delegate, LockToken immutableTsLock) {
             this.delegate = delegate;
@@ -287,7 +288,13 @@ import java.util.stream.Collectors;
         }
 
         @Override
-        public void close() {
+        public synchronized void close() {
+            if (hasClosed) {
+                // Some operations in close are not idempotent, e.g. openTransactionCounter.dec().
+                // Let's guarantee we run close() only once, and no-op in following runs to respect Closeable interface.
+                return;
+            }
+
             ExpectationsAwareTransaction txn = delegate;
             try {
                 if (txn.isUncommitted()) {
@@ -299,6 +306,8 @@ import java.util.stream.Collectors;
                 openTransactionCounter.dec();
             }
             scrubForAggressiveHardDelete(extractSnapshotTransaction(txn));
+
+            hasClosed = true;
         }
     }
 
