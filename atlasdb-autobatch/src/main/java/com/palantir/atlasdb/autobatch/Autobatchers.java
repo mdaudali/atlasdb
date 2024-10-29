@@ -30,14 +30,12 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tracing.Observability;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -95,13 +93,13 @@ public final class Autobatchers {
      * @param <O> type of output element
      * @return builder where the autobatcher can be further customised
      */
-    public static <I, O> AutobatcherBuilder<I, O> independent(Consumer<List<BatchElement<I, O>>> batchFunction) {
+    public static <I, O> AutobatcherBuilder<I, O> independent(IndependentBatchElementsConsumer<I, O> batchFunction) {
         return new AutobatcherBuilder<>(parameters -> new IndependentBatchingEventHandler<>(
                 maybeWrapWithTimeout(batchFunction, parameters), parameters.batchSize()));
     }
 
-    private static <I, O> Consumer<List<BatchElement<I, O>>> maybeWrapWithTimeout(
-            Consumer<List<BatchElement<I, O>>> batchFunction, EventHandlerParameters parameters) {
+    private static <I, O> IndependentBatchElementsConsumer<I, O> maybeWrapWithTimeout(
+            IndependentBatchElementsConsumer<I, O> batchFunction, EventHandlerParameters parameters) {
         return parameters
                 .batchFunctionTimeoutContext()
                 .map(context -> wrapWithTimeout(batchFunction, parameters.safeLoggablePurpose(), context))
@@ -116,8 +114,8 @@ public final class Autobatchers {
                 .orElse(coalescingFunction);
     }
 
-    private static <I, O> Consumer<List<BatchElement<I, O>>> wrapWithTimeout(
-            Consumer<List<BatchElement<I, O>>> delegate,
+    private static <I, O> IndependentBatchElementsConsumer<I, O> wrapWithTimeout(
+            IndependentBatchElementsConsumer<I, O> delegate,
             String safeLoggablePurpose,
             TimeoutOrchestrationContext context) {
         TimeLimiter limiter = SimpleTimeLimiter.create(context.exclusiveExecutor());

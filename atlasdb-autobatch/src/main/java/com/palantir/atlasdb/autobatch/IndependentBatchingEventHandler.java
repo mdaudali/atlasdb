@@ -20,13 +20,12 @@ import com.lmax.disruptor.EventHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 final class IndependentBatchingEventHandler<T, R> implements EventHandler<BatchElement<T, R>> {
-    private final Consumer<List<BatchElement<T, R>>> batchFunction;
+    private final IndependentBatchElementsConsumer<T, R> batchFunction;
     private final List<BatchElement<T, R>> pending;
 
-    IndependentBatchingEventHandler(Consumer<List<BatchElement<T, R>>> batchFunction, int bufferSize) {
+    IndependentBatchingEventHandler(IndependentBatchElementsConsumer<T, R> batchFunction, int bufferSize) {
         this.batchFunction = batchFunction;
         this.pending = new ArrayList<>(bufferSize);
     }
