@@ -439,6 +439,11 @@ acceptedBreaks:
     - code: "java.annotation.noLongerPresent"
       old: "@interface com.palantir.atlasdb.transaction.api.annotations.ReviewedRestrictedApiUsage"
       justification: "just moving annotation to another package"
+  "0.1180.0":
+    com.palantir.atlasdb:atlasdb-api:
+    - code: "java.method.addedToInterface"
+      new: "method void com.palantir.atlasdb.transaction.api.Transaction::onCommitOrAbort(java.lang.Runnable)"
+      justification: "similar to onSuccess, already used in other prod codepaths"
   "0.770.0":
     com.palantir.atlasdb:atlasdb-api:
     - code: "java.class.removed"
