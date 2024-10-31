@@ -87,7 +87,7 @@ uk.org.lidalia:slf4j-test = 1.1.0
 com.palantir.docker.compose:* = 1.9.0
 
 # Pinning Dropwizard 2.1.x until we can upgrade tests
-io.dropwizard:* = 2.1.7
+io.dropwizard:* = 3.0.10
 
 # Dropwizard 2.1.x has hard dependency on jakarta servlet 4.x.x
 # Whereas logback has a hard dependency on jakarta servlet >= 5.x.x
