@@ -149,6 +149,11 @@ public final class BackgroundTargetedSweeperFactory {
         DefaultSweepAssignedBucketStore sweepAssignedBucketStore =
                 DefaultSweepAssignedBucketStore.create(keyValueService);
         BucketProgressStore bucketProgressStore = DefaultBucketProgressStore.create(keyValueService);
+
+        new InitialBucketAssignerStateMachineBootstrapTask(
+                        components.shardProgress(), sweepAssignedBucketStore, timelockService::getFreshTimestamp)
+                .run();
+
         LockableFactory<ExclusiveTask> exclusiveTaskLockableFactory = LockableFactory.create(
                 timelockService,
                 // We will just retry later if we fail to acquire the lock at this time - liveness on a given sweeper
@@ -175,7 +180,8 @@ public final class BackgroundTargetedSweeperFactory {
                 installConfig.bucketBasedSweepThreads(),
                 runtimeConfig.map(TargetedSweepRuntimeConfig::autoScalingConfig),
                 runtimeConfig.map(TargetedSweepRuntimeConfig::enabled),
-                metrics);
+                metrics,
+                progressMetrics);
     }
 
     // TOOD(mdaudali): This will also be used in the autoscaling work, so will be refactored out at that point.

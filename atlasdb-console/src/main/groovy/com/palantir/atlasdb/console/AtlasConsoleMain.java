@@ -182,6 +182,9 @@ public class AtlasConsoleMain {
      * access (removes the need for users to create an explicit ~/.java.policy
      * file).
      */
+    // groovysh still sets the security manager, see
+    // https://github.com/groovy/groovy-core/blob/4c05980922a927b32691e4c3eba5633825cc01e3/subprojects/groovy-groovysh/src/main/groovy/org/codehaus/groovy/tools/shell/Main.groovy#L184C39-L184C60
+    @SuppressWarnings("removal")
     public static void callback(Script script, boolean mutationsEnabled)
             throws CompilationFailedException, IOException {
         System.setSecurityManager(null);

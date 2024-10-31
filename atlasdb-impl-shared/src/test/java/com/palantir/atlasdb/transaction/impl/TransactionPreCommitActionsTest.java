@@ -19,35 +19,35 @@ package com.palantir.atlasdb.transaction.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.atlasdb.common.api.timelock.TimestampLeaseName;
+import com.palantir.atlasdb.transaction.api.TimestampLeaseAwareTransaction.PreCommitAction;
 import com.palantir.atlasdb.transaction.impl.TransactionPreCommitActions.PerLeaseActions;
-import com.palantir.atlasdb.transaction.impl.TransactionPreCommitActions.PreCommitAction;
+import com.palantir.atlasdb.transaction.impl.TransactionPreCommitActions.PreCommitActionWrapper;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.LongSupplier;
 import org.junit.jupiter.api.Test;
 
 class TransactionPreCommitActionsTest {
-    private static final TimestampLeaseName LEASE_NAME_1 = TimestampLeaseName.of("lease_name_1");
-    private static final TimestampLeaseName LEASE_NAME_2 = TimestampLeaseName.of("lease_name_@");
+    private static final TimestampLeaseName LEASE_1 = TimestampLeaseName.of("lease_name_1");
+    private static final TimestampLeaseName LEASE_2 = TimestampLeaseName.of("lease_name_@");
 
     private final TransactionPreCommitActions allActions = new TransactionPreCommitActions();
 
     @Test
-    void test() {
-        Consumer<LongSupplier> action1 = _timestamps -> {};
-        Consumer<LongSupplier> action2 = _timestamps -> {};
-        Consumer<LongSupplier> action3 = _timestamps -> {};
+    void addPreCommitAction_batchesActionsForSameLease() {
+        PreCommitAction action1 = _timestamps -> {};
+        PreCommitAction action2 = _timestamps -> {};
+        PreCommitAction action3 = _timestamps -> {};
 
-        allActions.addPreCommitAction(LEASE_NAME_1, 5, action1);
-        allActions.addPreCommitAction(LEASE_NAME_1, 10, action2);
-        allActions.addPreCommitAction(LEASE_NAME_2, 10, action3);
+        allActions.addPreCommitAction(LEASE_1, 5, action1);
+        allActions.addPreCommitAction(LEASE_1, 10, action2);
+        allActions.addPreCommitAction(LEASE_2, 10, action3);
 
         Map<TimestampLeaseName, PerLeaseActions> actions = allActions.getActions();
         assertThat(actions).hasSize(2);
-        assertThat(actions.get(LEASE_NAME_1).timestampCount).isEqualTo(15);
-        assertThat(actions.get(LEASE_NAME_1).preCommitActions)
-                .containsExactlyInAnyOrder(new PreCommitAction(action2, 10), new PreCommitAction(action1, 5));
-        assertThat(actions.get(LEASE_NAME_2).timestampCount).isEqualTo(10);
-        assertThat(actions.get(LEASE_NAME_2).preCommitActions).containsExactly(new PreCommitAction(action3, 10));
+        assertThat(actions.get(LEASE_1).numLeasedTimestamps).isEqualTo(15);
+        assertThat(actions.get(LEASE_1).preCommitActions)
+                .containsExactlyInAnyOrder(
+                        PreCommitActionWrapper.of(action2, 10), PreCommitActionWrapper.of(action1, 5));
+        assertThat(actions.get(LEASE_2).numLeasedTimestamps).isEqualTo(10);
+        assertThat(actions.get(LEASE_2).preCommitActions).containsExactly(PreCommitActionWrapper.of(action3, 10));
     }
 }
