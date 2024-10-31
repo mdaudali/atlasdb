@@ -10,7 +10,7 @@ com.google.auto.service:auto-service-annotations = 1.0
 com.google.auto:auto-common = 1.2.2
 com.google.code.findbugs:findbugs-annotations = 3.0.1
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.dagger:* = 2.52
+com.google.dagger:* = 2.51.1
 # Ksp version is temporary, can be removed once Maven calms down.
 com.google.devtools.ksp:symbol-processing-api = 1.5.21-1.0.0-beta07
 com.google.errorprone:* = 2.10.0 # upgrading to 2.11.0 is blocked by a google bug
