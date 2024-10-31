@@ -451,6 +451,27 @@ public interface Transaction {
     void onSuccess(Runnable callback);
 
     /**
+     * Allow consumers to register callbacks to be run on {@link #commit()} or {@link #abort()},
+     * after a transaction has committed or aborted.
+     * {@link #onCommitOrAbort(Runnable)} callbacks run before {@link #onSuccess(Runnable)} callbacks.
+     * <p>
+     * Callbacks are usually cleanup tasks, e.g. {@link PreCommitCondition#cleanup()}.
+     * Since they are run after the transaction has committed or aborted, a callback exception does not affect
+     * the status of the transaction.
+     * In other words, it's possible for a transaction that committed successfully to have a callback that throws -
+     * in this case {@link #commit()} would throw the callback's exception, but the transaction would still
+     * commit successfully.
+     * <p>
+     * Callbacks are not atomic nor transactional - it's possible for a transaction to succeed and its callbacks to not
+     * be triggered (e.g. the Java process was interrupted before).
+     * Callbacks run even if a prior callback threw an exception.
+     * Callbacks are run in the reverse order they were added - i.e. the last added callback will be run first.
+     * Different from {@link #onSuccess(Runnable)}, {@link #onCommitOrAbort(Runnable)} callbacks are run if the
+     * transaction succeeded or failed.
+     */
+    void onCommitOrAbort(Runnable runnable);
+
+    /**
      * Disables read-write conflict checking for this table for the duration of this transaction only.
      *
      * This method should be called before any reads are done on this table.

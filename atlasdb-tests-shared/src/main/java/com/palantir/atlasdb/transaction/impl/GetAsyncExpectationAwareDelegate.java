@@ -22,22 +22,22 @@ import com.palantir.atlasdb.keyvalue.api.TableReference;
 import java.util.Map;
 import java.util.Set;
 
-public class GetAsyncCallbackAwareDelegate extends ForwardingCallbackAwareTransaction {
-    private final CallbackAwareTransaction delegate;
+public class GetAsyncExpectationAwareDelegate extends ForwardingExpectationsAwareTransaction {
+    private final ExpectationsAwareTransaction delegate;
     private final PathTypeTracker tracker;
 
-    public GetAsyncCallbackAwareDelegate(CallbackAwareTransaction transaction) {
+    public GetAsyncExpectationAwareDelegate(ExpectationsAwareTransaction transaction) {
         this.delegate = transaction;
         this.tracker = PathTypeTrackers.NO_OP;
     }
 
-    public GetAsyncCallbackAwareDelegate(CallbackAwareTransaction transaction, PathTypeTracker tracker) {
+    public GetAsyncExpectationAwareDelegate(ExpectationsAwareTransaction transaction, PathTypeTracker tracker) {
         this.delegate = transaction;
         this.tracker = tracker;
     }
 
     @Override
-    public CallbackAwareTransaction delegate() {
+    public ExpectationsAwareTransaction delegate() {
         return delegate;
     }
 

@@ -447,6 +447,11 @@ acceptedBreaks:
       new: "parameter void com.palantir.atlasdb.transaction.api.TimestampLeaseAwareTransaction::preCommit(com.palantir.atlasdb.common.api.timelock.TimestampLeaseName,\
         \ int, ===com.palantir.atlasdb.transaction.api.TimestampLeaseAwareTransaction.PreCommitAction===)"
       justification: "breaks on internal APIs only"
+  "0.1184.0":
+    com.palantir.atlasdb:atlasdb-api:
+    - code: "java.method.addedToInterface"
+      new: "method void com.palantir.atlasdb.transaction.api.Transaction::onCommitOrAbort(java.lang.Runnable)"
+      justification: "similar to onSuccess, already used in other prod codepaths"
   "0.770.0":
     com.palantir.atlasdb:atlasdb-api:
     - code: "java.class.removed"

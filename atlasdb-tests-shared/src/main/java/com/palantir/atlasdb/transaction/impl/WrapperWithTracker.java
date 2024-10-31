@@ -17,7 +17,7 @@
 package com.palantir.atlasdb.transaction.impl;
 
 interface WrapperWithTracker<T> {
-    WrapperWithTracker<CallbackAwareTransaction> TRANSACTION_NO_OP = (delegate, synchronousTracker) -> delegate;
+    WrapperWithTracker<ExpectationsAwareTransaction> TRANSACTION_NO_OP = (delegate, synchronousTracker) -> delegate;
 
     T apply(T delegate, PathTypeTracker pathTypeTracker);
 }
