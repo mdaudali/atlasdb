@@ -224,13 +224,6 @@ public class TargetedSweeper implements BackgroundSweeper, CallbackInitializable
                 mismatchBehaviour,
                 () -> runtime.get().shardRotationIntervalMinutes());
 
-        SingleBatchSweeper singleBatchSweeper = new DefaultSingleBatchSweeper(
-                metrics,
-                components.shardProgress(),
-                abandonedTransactionConsumer,
-                components.reader(),
-                components.deleter(),
-                components.cleaner());
         sweeper = BackgroundTargetedSweeperFactory.create(
                 keyValueService,
                 timelockService,
