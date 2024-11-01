@@ -192,23 +192,29 @@ import java.util.stream.Collectors;
     public <T, C extends PreCommitCondition, E extends Exception> T runTaskWithConditionThrowOnConflict(
             C condition, ConditionAwareTransactionTask<T, C, E> task) throws E, TransactionFailedRetriableException {
         checkOpen();
-        OpenTransactionImpl openTransaction;
-        try {
-            openTransaction = runTimed(
-                    () -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask");
-        } catch (Exception e) {
-            condition.cleanup();
-            throw e;
-        }
-        try {
+        try (OpenTransactionImpl openTransaction =
+                runTimed(() -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask")) {
             return openTransaction.execute(txn -> task.execute(txn, condition));
-        } finally {
-            openTransaction.close();
         }
     }
 
     @Override
     public List<OpenTransactionImpl> startTransactions(List<? extends PreCommitCondition> conditions) {
+        try {
+            return startTransactionsInternal(conditions);
+        } catch (Exception e) {
+            Closer closer = Closer.create(); // N.B. using closer to run all cleanup tasks even if one cleanup throws
+            conditions.forEach(condition -> closer.register(condition::cleanup));
+            try {
+                closer.close();
+            } catch (IOException ex) {
+                e.addSuppressed(ex);
+            }
+            throw e;
+        }
+    }
+
+    private List<OpenTransactionImpl> startTransactionsInternal(List<? extends PreCommitCondition> conditions) {
         if (conditions.isEmpty()) {
             return ImmutableList.of();
         }
@@ -251,18 +257,12 @@ import java.util.stream.Collectors;
             openTransactionCounter.inc(transactions.size());
             return transactions;
         } catch (Throwable t) {
-            // In case of failure, we need to clean up the resources opened in startTransaction, for all transactions
-            // opened.
-            // These resources are the preCommitCondition, removing transaction from lock-watch and unlocking immutable
-            // timestamp.
+            // In case of failure, we need to remove the transaction from our local lock-watch cache and unlocking
+            // immutable timestamp.
             // Note that in case we don't throw, the immutable timestamp is registered to be unlocked in the
-            // SnapshotTransaction constructor. But in case of failure, we need to manually unlock it here in case
-            // of failures though.
+            // SnapshotTransaction constructor. But in case of failure, we need to manually unlock it here.
 
-            // N.B. using closer to run all cleanup tasks even if one cleanup throws
-            Closer closer = Closer.create();
-
-            conditions.forEach(condition -> closer.register(condition::cleanup));
+            Closer closer = Closer.create(); // N.B. using closer to run all cleanup tasks even if one cleanup throws
             responses.forEach(
                     response -> closer.register(() -> lockWatchManager.requestTransactionStateRemovalFromCache(
                             response.startTimestampAndPartition().timestamp())));

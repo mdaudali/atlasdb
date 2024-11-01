@@ -436,9 +436,9 @@ public interface TransactionManager extends AutoCloseable {
      * For any data read or written to the transaction to be valid, the transaction must be committed explicitly
      * by the caller with {@link Transaction#commit()}.
      * <p>
-     * On commit or abort, the {@link PreCommitCondition#cleanup()} associated with a transaction will be run,
-     * so clients should not worry about manually cleaning up pre-commit conditions. Pre-commit conditions are also
-     * cleaned up in case we fail to open transactions.
+     * {@link PreCommitCondition#cleanup()} associated with a transaction will be run when the respective transaction
+     * commits or aborts.
+     * All pre-commit conditions are also cleaned in case {@link #startTransactions(List)} throws.
      * <p>
      * Note the caller must call {@link OpenTransaction#close()} after the transaction is committed to perform
      * additional cleanup. Failure to do so might incur in
