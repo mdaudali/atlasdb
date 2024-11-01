@@ -196,7 +196,6 @@ import java.util.stream.Collectors;
         try {
             openTransaction = runTimed(
                     () -> Iterables.getOnlyElement(startTransactions(ImmutableList.of(condition))), "setupTask");
-            openTransaction.onCommitOrAbort(condition::cleanup);
         } catch (Exception e) {
             condition.cleanup();
             throw e;
