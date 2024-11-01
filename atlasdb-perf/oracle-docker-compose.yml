@@ -1,0 +1,11 @@
+services:
+  oracle:
+    image: docker.palantir.build/pg/gotham/oracle-database:0.52.0
+    volumes:
+      - ./docker-startup:/opt/oracle/scripts/startup
+      - /Users/cvandevelde/oradata:/opt/oracle/oradata:rw
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_SYS_PASSWORD: 7_SeeingStones_7
+      MEMORY: 2Gi
