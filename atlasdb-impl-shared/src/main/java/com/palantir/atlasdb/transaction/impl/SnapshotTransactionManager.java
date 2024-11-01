@@ -209,6 +209,7 @@ import java.util.stream.Collectors;
                 closer.close();
             } catch (IOException ex) {
                 e.addSuppressed(ex);
+                log.info("Failed to cleanup pre-commit conditions on startTransaction failure", ex);
             }
             throw e;
         }
@@ -274,6 +275,7 @@ import java.util.stream.Collectors;
                 closer.close();
             } catch (IOException e) {
                 t.addSuppressed(e);
+                log.info("Failed to cleanup startTransaction resources on startTransaction failure", t);
             }
             throw Throwables.rewrapAndThrowUncheckedException(t);
         }
