@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
+import com.google.common.io.Closer;
 import com.palantir.atlasdb.cache.TimestampCache;
 import com.palantir.atlasdb.cell.api.DataKeyValueServiceManager;
 import com.palantir.atlasdb.cell.api.DdlManager;
@@ -72,6 +73,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.timestamp.TimestampManagementService;
 import com.palantir.timestamp.TimestampService;
 import com.palantir.util.SafeShutdownRunner;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -236,6 +238,12 @@ import java.util.stream.Collectors;
 
                                 ExpectationsAwareTransaction transaction = createTransaction(
                                         immutableTs, startTimestampSupplier, immutableTsLock, condition);
+
+                                transaction.onCommitOrAbort(condition::cleanup);
+                                transaction.onCommitOrAbort(
+                                        () -> lockWatchManager.requestTransactionStateRemovalFromCache(
+                                                response.startTimestampAndPartition()
+                                                        .timestamp()));
                                 transaction.onSuccess(
                                         () -> lockWatchManager.onTransactionCommit(transaction.getTimestamp()));
                                 return new OpenTransactionImpl(transaction, immutableTsLock);
@@ -244,11 +252,30 @@ import java.util.stream.Collectors;
             openTransactionCounter.inc(transactions.size());
             return transactions;
         } catch (Throwable t) {
-            responses.forEach(response -> lockWatchManager.requestTransactionStateRemovalFromCache(
-                    response.startTimestampAndPartition().timestamp()));
-            timelockService.tryUnlock(responses.stream()
+            // In case of failure, we need to clean up the resources opened in startTransaction, for all transactions
+            // opened.
+            // These resources are the preCommitCondition, removing transaction from lock-watch and unlocking immutable
+            // timestamp.
+            // Note that in case we don't throw, the immutable timestamp is registered to be unlocked in the
+            // SnapshotTransaction constructor. But in case of failure, we need to manually unlock it here in case
+            // of failures though.
+
+            // N.B. using closer to run all cleanup tasks even if one cleanup throws
+            Closer closer = Closer.create();
+
+            conditions.forEach(condition -> closer.register(condition::cleanup));
+            responses.forEach(
+                    response -> closer.register(() -> lockWatchManager.requestTransactionStateRemovalFromCache(
+                            response.startTimestampAndPartition().timestamp())));
+            closer.register(() -> timelockService.tryUnlock(responses.stream()
                     .map(response -> response.immutableTimestamp().getLock())
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toSet())));
+
+            try {
+                closer.close();
+            } catch (IOException e) {
+                t.addSuppressed(e);
+            }
             throw Throwables.rewrapAndThrowUncheckedException(t);
         }
     }
@@ -289,7 +316,6 @@ import java.util.stream.Collectors;
                 }
             } finally {
                 txn.reportExpectationsCollectedData();
-                lockWatchManager.requestTransactionStateRemovalFromCache(getTimestamp());
                 openTransactionCounter.dec();
             }
             scrubForAggressiveHardDelete(extractSnapshotTransaction(txn));
