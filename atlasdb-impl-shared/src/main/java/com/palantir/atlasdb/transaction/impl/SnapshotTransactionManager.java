@@ -290,11 +290,6 @@ import java.util.stream.Collectors;
             this.immutableTsLock = immutableTsLock;
         }
 
-        <T, E extends Exception> T execute(TransactionTask<T, E> task) {
-            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(task, immutableTsLock);
-            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, delegate), "runTaskThrowOnConflict");
-        }
-
         @Override
         public ExpectationsAwareTransaction delegate() {
             return delegate;
@@ -321,6 +316,18 @@ import java.util.stream.Collectors;
 
             hasClosed = true;
         }
+
+        <T, E extends Exception> T execute(TransactionTask<T, E> task) {
+            TransactionTask<T, E> wrappedTask = wrapTaskIfNecessary(task, immutableTsLock);
+            return runTimed(() -> runTaskThrowOnConflict(wrappedTask, delegate), "runTaskThrowOnConflict");
+        }
+    }
+
+    private void scrubForAggressiveHardDelete(SnapshotTransaction tx) {
+        if ((tx.getTransactionType() == TransactionType.AGGRESSIVE_HARD_DELETE) && !tx.isAborted()) {
+            // t.getCellsToScrubImmediately() checks that t has been committed
+            cleaner.scrubImmediately(this, tx.getCellsToScrubImmediately(), tx.getTimestamp(), tx.getCommitTimestamp());
+        }
     }
 
     private <T, E extends Exception> TransactionTask<T, E> wrapTaskIfNecessary(
@@ -333,13 +340,6 @@ import java.util.stream.Collectors;
 
     private boolean taskWrappingIsNecessary() {
         return !validateLocksOnReads;
-    }
-
-    private void scrubForAggressiveHardDelete(SnapshotTransaction tx) {
-        if ((tx.getTransactionType() == TransactionType.AGGRESSIVE_HARD_DELETE) && !tx.isAborted()) {
-            // t.getCellsToScrubImmediately() checks that t has been committed
-            cleaner.scrubImmediately(this, tx.getCellsToScrubImmediately(), tx.getTimestamp(), tx.getCommitTimestamp());
-        }
     }
 
     protected ExpectationsAwareTransaction createTransaction(
