@@ -453,6 +453,10 @@ public interface Transaction {
     /**
      * Allow consumers to register callbacks to be run on {@link #commit()} or {@link #abort()},
      * after a transaction has committed or aborted.
+     * <p>
+     * {@link #onCommitOrAbort(Runnable)} callbacks are added in a stack and run in opposite order they were added to
+     * the stack. I.e. they're FILO (first-in-last-out).
+     * <p>
      * {@link #onCommitOrAbort(Runnable)} callbacks run before {@link #onSuccess(Runnable)} callbacks.
      * <p>
      * Callbacks are usually cleanup tasks, e.g. {@link PreCommitCondition#cleanup()}.

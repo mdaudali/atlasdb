@@ -251,8 +251,14 @@ import java.util.stream.Collectors;
                                         () -> lockWatchManager.requestTransactionStateRemovalFromCache(
                                                 response.startTimestampAndPartition()
                                                         .timestamp()));
-                                transaction.onSuccess(
-                                        () -> lockWatchManager.onTransactionCommit(transaction.getTimestamp()));
+                                // N.B. run this before clearing the state from the cache with
+                                // requestTransactionStateRemovalFromCache
+                                transaction.onCommitOrAbort(() -> {
+                                    if (!transaction.isAborted()) {
+                                        // in onCommitOrAbort + not aborted == committed
+                                        lockWatchManager.onTransactionCommit(transaction.getTimestamp());
+                                    }
+                                });
                                 return new OpenTransactionImpl(transaction, immutableTsLock);
                             })
                     .collect(Collectors.toList());
