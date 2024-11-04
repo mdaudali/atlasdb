@@ -251,8 +251,9 @@ import java.util.stream.Collectors;
                                         () -> lockWatchManager.requestTransactionStateRemovalFromCache(
                                                 response.startTimestampAndPartition()
                                                         .timestamp()));
-                                // N.B. run this before clearing the state from the cache with
-                                // requestTransactionStateRemovalFromCache
+                                // N.B. register `onTransactionCommit` after `requestTransactionStateRemovalFromCache`
+                                // `onCommitOrAbort` is FILO, and we need to run `onTransactionCommit` before
+                                // `requestTransactionStateRemovalFromCache`
                                 transaction.onCommitOrAbort(() -> {
                                     if (!transaction.isAborted()) {
                                         // in onCommitOrAbort + not aborted == committed
