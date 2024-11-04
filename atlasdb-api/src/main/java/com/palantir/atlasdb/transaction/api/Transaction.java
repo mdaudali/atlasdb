@@ -406,13 +406,23 @@ public interface Transaction {
     boolean isAborted();
 
     /**
-     * Gets whether the transaction has not been committed.
+     * Gets whether the transaction has not been committed nor aborted.
      *
      * @return <code>true</code> if neither <code>commit()</code> or <code>abort()</code> have been called,
      *         otherwise <code>false</code>
      */
     @Idempotent
     boolean isUncommitted();
+
+    /**
+     * Gets whether the transaction been committed. Note that it's possible for the underlying KVS to have committed
+     * the transaction but {@link #isDefinitivelyCommitted()} to return false (e.g. when the KVS call timed out
+     * client-side but succeeded server-side).
+     *
+     * @return <code>true</code> <code>commit()</code> has been called and did not throw, otherwise <code>false</code>.
+     */
+    @Idempotent
+    boolean isDefinitivelyCommitted();
 
     /**
      * Gets the timestamp the current transaction is running at.

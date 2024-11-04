@@ -255,8 +255,7 @@ import java.util.stream.Collectors;
                                 // `onCommitOrAbort` is FILO, and we need to run `onTransactionCommit` before
                                 // `requestTransactionStateRemovalFromCache`
                                 transaction.onCommitOrAbort(() -> {
-                                    if (!transaction.isAborted()) {
-                                        // in onCommitOrAbort + not aborted == committed
+                                    if (transaction.isDefinitivelyCommitted()) {
                                         lockWatchManager.onTransactionCommit(transaction.getTimestamp());
                                     }
                                 });
