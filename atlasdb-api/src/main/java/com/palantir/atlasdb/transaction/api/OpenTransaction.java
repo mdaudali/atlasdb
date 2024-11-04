@@ -22,6 +22,7 @@ public interface OpenTransaction extends Transaction, Closeable {
     /**
      * Aborts the transaction if uncommitted and cleanups transaction state.
      * All open transactions <b>must be closed</b>.
+     * Not closing transactions after they're no longer in use may lead to arbitrary delays elsewhere in the system.
      */
     @Override
     void close();
