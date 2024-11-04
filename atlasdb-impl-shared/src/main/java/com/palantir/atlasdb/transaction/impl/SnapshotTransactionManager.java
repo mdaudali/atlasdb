@@ -245,6 +245,7 @@ import java.util.stream.Collectors;
                                 ExpectationsAwareTransaction transaction = createTransaction(
                                         immutableTs, startTimestampSupplier, immutableTsLock, condition);
 
+                                transaction.onCommitOrAbort(transaction::reportExpectationsCollectedData);
                                 transaction.onCommitOrAbort(condition::cleanup);
                                 transaction.onCommitOrAbort(
                                         () -> lockWatchManager.requestTransactionStateRemovalFromCache(
@@ -311,7 +312,6 @@ import java.util.stream.Collectors;
                     txn.abort();
                 }
             } finally {
-                txn.reportExpectationsCollectedData();
                 openTransactionCounter.dec();
             }
             scrubForAggressiveHardDelete(extractSnapshotTransaction(txn));
