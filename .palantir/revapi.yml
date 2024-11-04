@@ -450,6 +450,10 @@ acceptedBreaks:
   "0.1184.0":
     com.palantir.atlasdb:atlasdb-api:
     - code: "java.method.addedToInterface"
+      new: "method boolean com.palantir.atlasdb.transaction.api.Transaction::isDefinitivelyCommitted()"
+      justification: "adding a new method to confirm if a transaction successfully\
+        \ committed from the atlas perspective"
+    - code: "java.method.addedToInterface"
       new: "method void com.palantir.atlasdb.transaction.api.OpenTransaction::close()"
       justification: "OpenTransaction has a single internal consumer, and it's current\
         \ interface caused confusion in recent refactors"
