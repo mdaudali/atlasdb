@@ -16,17 +16,14 @@
 
 package com.palantir.atlasdb.common.api.timelock;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import java.util.Comparator;
 import org.immutables.value.Value;
 
-@JsonDeserialize(as = ImmutableTimestampLeaseName.class)
-@JsonSerialize(as = ImmutableTimestampLeaseName.class)
 @Value.Immutable
 @Safe
 public interface TimestampLeaseName {
@@ -45,6 +42,7 @@ public interface TimestampLeaseName {
                 SafeArg.of("name", name()));
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     static TimestampLeaseName of(@Safe String name) {
         return ImmutableTimestampLeaseName.builder().name(name).build();
     }
