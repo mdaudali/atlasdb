@@ -46,14 +46,14 @@ import com.palantir.atlasdb.transaction.api.Transaction;
 import com.palantir.common.base.BatchingVisitableView;
 import com.palantir.common.persist.Persistables;
 import com.palantir.goethe.Goethe;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -679,7 +679,7 @@ public class TableClassRendererV2 {
         SortedSet<NamedColumnDescription> namedColumns = ColumnRenderers.namedColumns(tableMetadata);
         deleteRowBuilder
                 .addStatement("$T row = $T.of($L)", rowType, rowType, getArgumentsFromRowComponents(tableMetadata))
-                .addStatement("byte[] rowBytes = row.persistToBytes()", Persistables.class)
+                .addStatement("byte[] rowBytes = row.persistToBytes()")
                 .addStatement(
                         "$T<$T> cells = $T.newHashSetWithExpectedSize($L)",
                         Set.class,
@@ -707,7 +707,7 @@ public class TableClassRendererV2 {
 
         return deleteColumnBuilder
                 .addStatement("$T row = $T.of($L)", rowType, rowType, getArgumentsFromRowComponents(tableMetadata))
-                .addStatement("byte[] rowBytes = row.persistToBytes()", Persistables.class)
+                .addStatement("byte[] rowBytes = row.persistToBytes()")
                 .addStatement(
                         "$T<$T> cells = $T.of($T.create(rowBytes, $T.toCachedBytes($L)))",
                         Set.class,
