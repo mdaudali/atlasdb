@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix `TimestampLeaseRequests` serialization and de-serialization.
+  links:
+  - https://github.com/palantir/atlasdb/pull/7421
