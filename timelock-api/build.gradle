@@ -13,6 +13,7 @@ dependencies {
     implementation 'com.google.guava:guava'
 
     testImplementation project(':atlasdb-api')
+    testImplementation project(':atlasdb-commons-api')
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.assertj:assertj-core'
@@ -22,6 +23,7 @@ dependencies {
 subprojects {
     apply from: "../../gradle/shared.gradle"
     dependencies {
+        api project(':atlasdb-commons-api')
         api project(':lock-api-objects')
         api project(':timelock-api')
         api project(':leader-election-api')
