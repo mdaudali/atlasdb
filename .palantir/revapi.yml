@@ -452,6 +452,14 @@ acceptedBreaks:
     - code: "java.method.addedToInterface"
       new: "method void com.palantir.atlasdb.transaction.api.Transaction::onCommitOrAbort(java.lang.Runnable)"
       justification: "similar to onSuccess, already used in other prod codepaths"
+  "0.1187.0":
+    com.palantir.atlasdb:atlasdb-api:
+    - code: "java.class.removed"
+      old: "interface com.palantir.atlasdb.transaction.api.TimestampLeaseAwareTransactionManager"
+      justification: "Discussed: break is intended"
+    - code: "java.method.addedToInterface"
+      new: "method long com.palantir.atlasdb.transaction.api.TransactionManager::getLeasedTimestamp(com.palantir.atlasdb.common.api.timelock.TimestampLeaseName)"
+      justification: "Discussed: break is intended"
   "0.770.0":
     com.palantir.atlasdb:atlasdb-api:
     - code: "java.class.removed"
