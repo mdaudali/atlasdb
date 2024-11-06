@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Remove `TimestampLeaseAwareTransactionManger`
+  links:
+  - https://github.com/palantir/atlasdb/pull/7427
