@@ -74,7 +74,7 @@ org.wildfly.common:wildfly-common = 2.0.1
 org.xerial.snappy:snappy-java = 1.1.10.4
 org.xerial:sqlite-jdbc = 3.42.0.0
 org.yaml:snakeyaml = 2.3
-uk.org.lidalia:slf4j-test = 1.1.0
+uk.org.lidalia:slf4j-test = 1.2.0
 
 # Manually upgraded versions
 # dependency-upgrader:OFF
@@ -83,8 +83,8 @@ uk.org.lidalia:slf4j-test = 1.1.0
 # In the short term, before that gets fixed, we pin to 1.8.0 to enable excavators to bump other dependencies properly
 com.palantir.docker.compose:* = 1.9.0
 
-# Pinning Dropwizard 2.1.x until we can upgrade tests
-io.dropwizard:* = 2.1.7
+# Pinning Dropwizard 3.0.0 until we manually upgrade it to 4
+io.dropwizard:* = 3.0.0
 
 # Dropwizard 2.1.x has hard dependency on jakarta servlet 4.x.x
 # Whereas logback has a hard dependency on jakarta servlet >= 5.x.x

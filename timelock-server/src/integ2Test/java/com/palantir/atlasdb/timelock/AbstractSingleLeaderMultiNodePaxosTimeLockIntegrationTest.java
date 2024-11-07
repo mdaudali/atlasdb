@@ -117,6 +117,10 @@ public abstract class AbstractSingleLeaderMultiNodePaxosTimeLockIntegrationTest 
 
         for (TestableTimelockServer server : cluster.servers()) {
             server.stopUsingBatchedSingleLeader();
+            if (cluster.currentLeaderFor(client.namespace()) == server) {
+                // if we are the leader failover twice to ensure we see the new sequence
+                cluster.failoverToNewLeader(client.namespace());
+            }
             cluster.failoverToNewLeader(client.namespace());
             long sequenceForBatchedEndpoint = getSequenceForServerUsingBatchedEndpoint(server);
             long sequenceForOldEndpoint = getSequenceForServerUsingOldEndpoint(server);
