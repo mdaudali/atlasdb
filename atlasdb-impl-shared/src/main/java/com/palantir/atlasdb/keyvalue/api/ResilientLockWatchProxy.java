@@ -83,7 +83,7 @@ public final class ResilientLockWatchProxy<T> extends AbstractInvocationHandler 
     private synchronized RuntimeException handleException(InvocationTargetException rethrow) {
         try {
             throw rethrow.getCause();
-        } catch (TransactionLockWatchFailedException | QosException | CancellationException | Error e) {
+        } catch (TransactionLockWatchFailedException | QosException | CancellationException e) {
             throw e;
         } catch (Throwable t) {
             if (delegate == fallbackCache) {
