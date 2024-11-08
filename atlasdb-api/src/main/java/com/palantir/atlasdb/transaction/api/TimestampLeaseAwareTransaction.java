@@ -35,7 +35,7 @@ public interface TimestampLeaseAwareTransaction {
      * If {@code numLeasedTimestamps} is greater than 0, fresh timestamps will be fetched from {@link TransactionManager#getTimelockService()}
      * and will be provided to the pre-commit lambda via the supplier on {@code Consumer<LongSupplier>}.
      * <p>
-     * Clients can use {@link TimestampLeaseAwareTransactionManager#getLeasedTimestamp(TimestampLeaseName)}
+     * Clients can use {@link TransactionManager#getLeasedTimestamp(TimestampLeaseName)}
      * to fetch a timestamp before the earliest leased timestamp for a given {@code timestampLeaseName} on open
      * transactions.
      *

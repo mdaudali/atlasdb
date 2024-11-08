@@ -44,7 +44,6 @@ import com.palantir.atlasdb.transaction.api.DeleteExecutor;
 import com.palantir.atlasdb.transaction.api.KeyValueServiceStatus;
 import com.palantir.atlasdb.transaction.api.OpenTransaction;
 import com.palantir.atlasdb.transaction.api.PreCommitCondition;
-import com.palantir.atlasdb.transaction.api.TimestampLeaseAwareTransactionManager;
 import com.palantir.atlasdb.transaction.api.Transaction;
 import com.palantir.atlasdb.transaction.api.Transaction.TransactionType;
 import com.palantir.atlasdb.transaction.api.TransactionFailedRetriableException;
@@ -86,8 +85,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/* package */ class SnapshotTransactionManager extends AbstractLockAwareTransactionManager
-        implements TimestampLeaseAwareTransactionManager {
+/* package */ class SnapshotTransactionManager extends AbstractLockAwareTransactionManager {
     private static final SafeLogger log = SafeLoggerFactory.get(SnapshotTransactionManager.class);
 
     private static final int NUM_RETRIES = 10;
@@ -527,7 +525,7 @@ import java.util.stream.Collectors;
 
     @Override
     @ReviewedRestrictedApiUsage
-    public long getLeasedTimestamp(TimestampLeaseName leaseName) {
+    public long getMinLeasedTimestamp(TimestampLeaseName leaseName) {
         return timelockService.getMinLeasedTimestamps(Set.of(leaseName)).get(leaseName);
     }
 
