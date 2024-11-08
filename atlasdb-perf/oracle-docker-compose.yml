@@ -2,8 +2,7 @@ services:
   oracle:
     image: palantirtechnologies/oracle-atlasdb:19.24
     volumes:
-      - ./docker-startup:/opt/oracle/scripts/startup
-      - /Users/cvandevelde/oradata:/opt/oracle/oradata:rw
+      - ./docker-startup:/opt/oracle/scripts/startup      
     ports:
       - "1521:1521"
     environment:
