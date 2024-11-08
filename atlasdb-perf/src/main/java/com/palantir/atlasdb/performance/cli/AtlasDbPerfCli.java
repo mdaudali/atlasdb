@@ -73,7 +73,7 @@ public class AtlasDbPerfCli {
 
     @Option(
             name = {"--db-uri"},
-            description = "Docker uri (e.g. POSTGRES/ORACLE/CASSANDRA@[phost:pport]).This is an alternative to"
+            description = "Docker uri (e.g. POSTGRES/ORACLE/CASSANDRA@[phost:pport]). This is an alternative to"
                     + " specifying the --backend options that starts the docker containers locally.")
     private List<String> dbUris;
 
