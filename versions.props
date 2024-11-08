@@ -83,8 +83,8 @@ uk.org.lidalia:slf4j-test = 1.2.0
 # In the short term, before that gets fixed, we pin to 1.8.0 to enable excavators to bump other dependencies properly
 com.palantir.docker.compose:* = 1.9.0
 
-# Pinning Dropwizard 3.0.0 until we manually upgrade it to 4
-io.dropwizard:* = 3.0.0
+# Pinning Dropwizard 3.0.10 until we manually upgrade it to 4
+io.dropwizard:* = 3.0.10
 
 # Dropwizard 2.1.x has hard dependency on jakarta servlet 4.x.x
 # Whereas logback has a hard dependency on jakarta servlet >= 5.x.x
@@ -93,9 +93,9 @@ ch.qos.logback:* = 1.2.11
 
 # Dropwizard 2.1.x DropwizardExtensionsSupport relies on junit 5.10.x and below
 # All the below bump junit to an incompatible version. Bump this after bumping Dropwizard to 3.x
-org.junit.jupiter:* = 5.10.2
-org.junit.platform:* = 1.10.2
-org.mockito:* = 5.12.0
+org.junit.jupiter:* = 5.11.3
+org.junit.platform:* = 1.11.3
+org.mockito:* = 5.14.2
 
 # Dagger 2.52.0+ adds a dependency on jakarta. Bump this with the javax -> jakarta migration.
 com.google.dagger:* = 2.51.1
