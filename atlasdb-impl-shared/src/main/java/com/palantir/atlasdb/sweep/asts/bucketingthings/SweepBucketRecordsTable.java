@@ -17,13 +17,14 @@
 package com.palantir.atlasdb.sweep.asts.bucketingthings;
 
 import com.palantir.atlasdb.sweep.asts.TimestampRange;
+import java.util.Optional;
 
 public interface SweepBucketRecordsTable {
     /**
-     * Returns the {@link TimestampRange} for the given bucket identifier, throwing a
-     * {@link java.util.NoSuchElementException} if one is not present.
+     * Returns a {@link TimestampRange} for the given bucket identifier, if one exists. Iff a bucket is closed, then
+     * the corresponding record will be present. (If the bucket is open, no record will be present.)
      */
-    TimestampRange getTimestampRangeRecord(long bucketIdentifier);
+    Optional<TimestampRange> getTimestampRangeRecord(long bucketIdentifier);
 
     void putTimestampRangeRecord(long bucketIdentifier, TimestampRange timestampRange);
 
