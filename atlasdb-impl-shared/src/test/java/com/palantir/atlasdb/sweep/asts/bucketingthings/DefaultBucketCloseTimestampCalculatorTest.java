@@ -67,14 +67,6 @@ public final class DefaultBucketCloseTimestampCalculatorTest {
     }
 
     @Test
-    public void returnsEmptyIfSufficientTimeHasNotPassedSinceStartTimestamp() {
-        long startTimestamp = 18 * SweepQueueUtils.TS_COARSE_GRANULARITY; // Arbitrarily chosen.
-        when(puncherStore.getMillisForTimestamp(startTimestamp)).thenReturn(clock.millis());
-        OptionalLong maybeEndTimestamp = bucketCloseTimestampCalculator.getBucketCloseTimestamp(startTimestamp);
-        assertThat(maybeEndTimestamp).isEmpty();
-    }
-
-    @Test
     public void
             returnsLogicalTimestampSufficientTimeAfterStartTimestampIfTenMinutesHasPassedAndLogicalTimestampAheadOfStart() {
         long startTimestamp = 123 * SweepQueueUtils.TS_COARSE_GRANULARITY;
@@ -90,13 +82,17 @@ public final class DefaultBucketCloseTimestampCalculatorTest {
 
     @ParameterizedTest
     @ValueSource(
-            longs = {2300 * SweepQueueUtils.TS_COARSE_GRANULARITY, 2315 * SweepQueueUtils.TS_COARSE_GRANULARITY
-            }) // less than, and equal to.
-    // This is to test what happens when the puncher store returns a timestamp less than (or equal to) the start
-    // timestamp
-    // In both of these cases, we should not use the punch table result, but instead fallback to the relevant algorithm.
+            longs = {
+                2300 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                2315 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                2315 * SweepQueueUtils.TS_COARSE_GRANULARITY + 1,
+                2316 * SweepQueueUtils.TS_COARSE_GRANULARITY - 1
+            }) // less than, equal to, and insufficiently greater than
+    // This is to test what happens when the puncher store returns a timestamp less than / equal / insufficiently
+    // greater than the start timestamp
+    // In all of these cases, we should not use the punch table result, but instead fallback to the relevant algorithm.
     public void
-            returnsEmptyIfSufficientTimeHasPassedPuncherTimestampBeforeStartAndLatestFreshTimestampNotFarEnoughAhead(
+            returnsEmptyIfSufficientTimeHasPassedPuncherTimestampInsufficientlyFarAndLatestFreshTimestampNotFarEnoughAhead(
                     long puncherTimestamp) {
         long startTimestamp = 2315 * SweepQueueUtils.TS_COARSE_GRANULARITY;
         when(puncherStore.getMillisForTimestamp(startTimestamp)).thenReturn(clock.millis());
@@ -110,9 +106,15 @@ public final class DefaultBucketCloseTimestampCalculatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {123 * SweepQueueUtils.TS_COARSE_GRANULARITY, 312 * SweepQueueUtils.TS_COARSE_GRANULARITY})
+    @ValueSource(
+            longs = {
+                123 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                312 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                312 * SweepQueueUtils.TS_COARSE_GRANULARITY + 1,
+                313 * SweepQueueUtils.TS_COARSE_GRANULARITY - 1
+            })
     public void
-            returnsLatestClampedFreshTimestampIfSufficientTimeHasPassedPuncherTimestampBeforeStartAndCalculatedTimestampFarEnoughAhead(
+            returnsLatestClampedFreshTimestampIfSufficientTimeHasPassedPuncherTimestampInsufficientlyFarAndCalculatedTimestampFarEnoughAhead(
                     long puncherTimestamp) {
         long startTimestamp = 312 * SweepQueueUtils.TS_COARSE_GRANULARITY;
         when(puncherStore.getMillisForTimestamp(startTimestamp)).thenReturn(clock.millis());
@@ -126,8 +128,14 @@ public final class DefaultBucketCloseTimestampCalculatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {98 * SweepQueueUtils.TS_COARSE_GRANULARITY, 100 * SweepQueueUtils.TS_COARSE_GRANULARITY})
-    public void returnsClampedAndCappedTimestampIfPuncherTimestampBeforeStartAndLatestFreshTimestampIsTooFarAhead(
+    @ValueSource(
+            longs = {
+                98 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                100 * SweepQueueUtils.TS_COARSE_GRANULARITY,
+                100 * SweepQueueUtils.TS_COARSE_GRANULARITY + 1,
+                101 * SweepQueueUtils.TS_COARSE_GRANULARITY - 1
+            })
+    public void returnsClampedAndCappedTimestampIfPuncherTimestampInsufficientlyFarAndLatestFreshTimestampIsTooFarAhead(
             long puncherTimestamp) {
         long startTimestamp = 100 * SweepQueueUtils.TS_COARSE_GRANULARITY;
         when(puncherStore.getMillisForTimestamp(startTimestamp)).thenReturn(clock.millis());
